@@ -32,7 +32,6 @@ var realTimeRequestParams = {
 // Full documentaiton here:
 // http://bustime.mta.info/wiki/Developers/OneBusAwayRESTfulAPI
 
-// http://bustime.mta.info/api/where/stops-for-location.json?lat=40.748433&lon=-73.985656&latSpan=0.005&lonSpan=0.005&key=69f9c12c-d751-4e16-8bd7-a12aaf8c7b0e
 
 var discoveryRequestParams = {
   uri: 'http://bustime.mta.info/api/where/',
@@ -69,7 +68,7 @@ router.get('/routes/', (req, res) => {
 // real: http://bustime.mta.info/api/where/stops-for-route/MTA NYCT_B38.json
 // mine: http://bustime.mta.info/api/where/routes-for-agency/MTA%20NYCT_B38.json",
 
-router.get('/:route/', function (req, res) {
+router.get('/routes/:route/', function (req, res) {
   let options = Object.assign({}, discoveryRequestParams);
   options.uri += 'stops-for-route/MTA NYCT_' + req.params.route.toUpperCase() + '.json';
   options.qs.includePolylines = false;
@@ -82,14 +81,49 @@ router.get('/:route/', function (req, res) {
     e(err);
     res.json({error: err});
   });
-  //
-  //
 });
+
+// http://bustime.mta.info/api/where/stops-for-location.json?lat=40.748433&lon=-73.985656&latSpan=0.005&lonSpan=0.005
+
+
+// Discovery data for a location:
+
+router.get('/location/', function (req, res) {
+  let options = Object.assign({}, discoveryRequestParams);
+  options.uri += 'stops-for-location.json';
+  if (req.query.lat && req.query.long) {
+    options.qs.lat = req.query.lat;
+    options.qs.lon = req.query.long;
+  } else {
+    let err = 'Params "lat" and "lon" are required. ' + req.query.lat + ' * ' + req.query.long;
+    e(err);
+    res.json({error: err});
+  }
+  
+  options.qs.latSpan = 0.005;
+  options.qs.lonSpan = 0.005;
+  if (req.query.latSpan) {
+    options.qs.latSpan = req.query.latSpan;
+  }
+  if (req.query.lonSpan) {
+    options.qs.lonSpan = req.query.lonSpan;
+  }
+  
+  rp(options)
+  .then((resJSON) => {
+    res.json(resJSON);
+  })
+  .catch((err) => {
+    e(err);
+    res.json({error: err});
+  });
+});
+
 
 
 // Real time bus data for a specific stop
 
-router.get('/:route/:stop/', function (req, res) {
+router.get('/routes/:route/:stop/', function (req, res) {
   let options = Object.assign({}, realTimeRequestParams);
   options.qs.MonitoringRef = req.params.stop;
   options.qs.LineRef = 'MTA NYCT_' + req.params.route.toUpperCase();
