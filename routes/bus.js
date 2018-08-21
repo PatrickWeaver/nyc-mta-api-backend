@@ -32,6 +32,8 @@ var realTimeRequestParams = {
 // Full documentaiton here:
 // http://bustime.mta.info/wiki/Developers/OneBusAwayRESTfulAPI
 
+// http://bustime.mta.info/api/where/stops-for-location.json?lat=40.748433&lon=-73.985656&latSpan=0.005&lonSpan=0.005&key=69f9c12c-d751-4e16-8bd7-a12aaf8c7b0e
+
 var discoveryRequestParams = {
   uri: 'http://bustime.mta.info/api/where/',
   qs: {
@@ -84,6 +86,9 @@ router.get('/:route/', function (req, res) {
   //
 });
 
+
+// Real time bus data for a specific stop
+
 router.get('/:route/:stop/', function (req, res) {
   let options = Object.assign({}, realTimeRequestParams);
   options.qs.MonitoringRef = req.params.stop;
@@ -95,21 +100,9 @@ router.get('/:route/:stop/', function (req, res) {
   rp(options)
   .then((resJSON) => {
     
-    let testJSON = {
-      testData: {
-        name: "Test Name",
-        amount: 60
-      },
-      top: "Hello"
-    }
+    console.log(JSON.stringify(resJSON));
+    res.json(resJSON);
     
-    
-    if (false) {
-      res.json(testJSON);
-    } else {
-      console.log(JSON.stringify(resJSON));
-      res.json(resJSON);
-    }
   })
   .catch((err) => {
     e(err);
