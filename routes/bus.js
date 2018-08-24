@@ -16,7 +16,7 @@ var realTimeRequestParams = {
     version: '2', // either '1' or '2'
     OperatorRef: 'MTA', // Always 'MTA'
     MonitoringRef: null, // ** ADD Stop ID
-    LineRef: 'MTA NYCT_', // ** UPDATE Add line ID to the end
+    //LineRef: 'MTA NYCT_', // ** UPDATE Add line ID to the end
     //DirectionRef: null, // ** ADD Either 0 or 1 (optional)
     StopMonitoringDetailLevel: 'calls', // options: 'minimum', 'basic', 'normal', 'calls'
     MaximumNumberOfCallsOnwards: 10,
@@ -52,11 +52,15 @@ router.get('/', function (req, res) {
 router.get('/routes/', (req, res) => {
   let options = Object.assign({}, discoveryRequestParams);
   options.uri += 'routes-for-agency/MTA%20NYCT.json';
+  options.qs.version = 2;
   rp(options)
-  .then((resJSON) => {  
+  .then((resJSON) => {
+    console.log("* * * * * * * * * * * ");
+    console.log(resJSON);
     res.json(resJSON);
   })
   .catch((err) => {
+    console.log("routes ERROR");
     e(err);
     res.json({error: err});
   });
@@ -94,6 +98,7 @@ router.get('/location/', function (req, res) {
   if (req.query.lat && req.query.long) {
     options.qs.lat = req.query.lat;
     options.qs.lon = req.query.long;
+    options.qs.version = 1;
   } else {
     let err = 'Params "lat" and "lon" are required. ' + req.query.lat + ' * ' + req.query.long;
     e(err);
@@ -108,6 +113,8 @@ router.get('/location/', function (req, res) {
   if (req.query.lonSpan) {
     options.qs.lonSpan = req.query.lonSpan;
   }
+  
+  console.log(JSON.stringify(options));
   
   rp(options)
   .then((resJSON) => {
@@ -130,6 +137,23 @@ router.get('/routes/:route/:stop/', function (req, res) {
   //options.qs.DirectionRef = 1;
   
   console.log(JSON.stringify(options))
+  
+  rp(options)
+  .then((resJSON) => {
+    
+    console.log(JSON.stringify(resJSON));
+    res.json(resJSON);
+    
+  })
+  .catch((err) => {
+    e(err);
+    res.json({error: err});
+  });
+});
+
+router.get('/stop/:stop/', function (req, res) {
+  let options = Object.assign({}, realTimeRequestParams);
+  options.qs.MonitoringRef = req.params.stop;
   
   rp(options)
   .then((resJSON) => {
