@@ -130,10 +130,12 @@ router.get('/location/', function (req, res) {
 
 // Real time bus data for a specific stop
 
-router.get('/routes/:route/:stop/', function (req, res) {
+router.get('/stop/:stop/', function (req, res) {
   let options = Object.assign({}, realTimeRequestParams);
   options.qs.MonitoringRef = req.params.stop;
-  options.qs.LineRef = 'MTA NYCT_' + req.params.route.toUpperCase();
+  if (req.query.route) {
+    options.qs.LineRef = 'MTA NYCT_' + req.query.route.toUpperCase();
+  }
   //options.qs.DirectionRef = 1;
   
   console.log(JSON.stringify(options))
